@@ -15,12 +15,14 @@ int IsCharWhitespace(char c);
 
 int IsCharDelimiter(char c);
 
-int IsStringInt(char *pstrString);
+int IsStringInteger(char *pstrString);
 
 int IsStringFloat(char *pstrString);
 
 int IsStringWhitespace(char *pstrString);
 
 int IsStringIdent(char *pstrString);
+
+void strupr(char *pstrString);
 
 #endif //ASSEMBLER_STRING_UTIL_H

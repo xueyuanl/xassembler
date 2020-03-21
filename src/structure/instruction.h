@@ -6,7 +6,7 @@
 #define ASSEMBLER_INSTRUCTION_H
 
 #include <string.h>
-#include "constants.h"
+#include "../lib/constants.h"
 
 typedef int OpTypes;
 
@@ -18,5 +18,7 @@ typedef struct _InstrLookup     // An instruction lookup
     int iOpCount;               // Number of operands
     OpTypes *OpList;            // Pointer to operand list
 } Instruction;
+
+int GetInstrByMnemonic(char *pstrMnemonic, Instruction *pInstr);
 
 #endif //ASSEMBLER_INSTRUCTION_H

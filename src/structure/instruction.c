@@ -3,16 +3,7 @@
 //
 
 #include "instruction.h"
-#include "globals.h"
-
-void strupr(char *string) {
-    while (*string) {
-        if (*string >= 'a' && *string <= 'z') {
-            *string = *string - 32;
-        }
-        string++;
-    }
-}
+#include "../lib/globals.h"
 
 int AddInstrLookup(char *pstrMnemonic, int iOpCode, int iOpCount) {
     // Just use a simple static int to keep track of the next instruction index in the table

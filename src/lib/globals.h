@@ -7,14 +7,15 @@
 
 #include "linked_list.h"
 #include "constants.h"
-#include "instruction.h"
+#include "../table/instruction.h"
+#include "../lexer.h"
 
 // Source code representation
 char **g_ppstrSourceCode = NULL;
 int g_iSourceCodeSize;
 
 
-// The instruction lookup table
+// The instruction lookup structure
 Instruction g_InstrTable[MAX_INSTR_LOOKUP_COUNT];
 
 typedef struct _Op              // An assembled operand
@@ -24,7 +25,7 @@ typedef struct _Op              // An assembled operand
     {
         int iIntLiteral;        // Integer literal
         float fFloatLiteral;    // Float literal
-        int iStringTableIndex;  // String table index
+        int iStringTableIndex;  // String structure index
         int iStackIndex;        // Stack index
         int iInstrIndex;        // Instr index
         int iFuncIndex;         // Function index
@@ -62,5 +63,6 @@ LinkedList g_SymbolTable;
 LinkedList g_LabelTable;
 LinkedList g_HostAPICallTable;
 
+Lexer g_Lexer;
 
 #endif //ASSEMBLER_GLOBALS_H

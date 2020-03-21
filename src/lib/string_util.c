@@ -40,7 +40,7 @@ int IsCharDelimiter(char c) {
         return FALSE;
 }
 
-int IsStringInt(char *pstrString) {
+int IsStringInteger(char *pstrString) {
     if (!pstrString)
         return FALSE;
     unsigned length = strlen(pstrString);
@@ -123,4 +123,13 @@ int IsStringIdent(char *pstrString) {
             return FALSE;
     }
     return TRUE;
+}
+
+void strupr(char *pstrString) {
+    while (*pstrString) {
+        if (*pstrString >= 'a' && *pstrString <= 'z') {
+            *pstrString = *pstrString - 32;
+        }
+        pstrString++;
+    }
 }

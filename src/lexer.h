@@ -7,47 +7,79 @@
 
 #include <string.h>
 #include "lib/string_util.h"
+#include "lib/linked_list.h"
+#include "lib/globals.h"
+#include "structure/instruction.h"
 
 typedef int Token;
 
+typedef struct _Lexer               // The lexer's state
+{
+    unsigned int iIndex0;
+    unsigned int iIndex1;
+    int iCurrSourceLine;
+    int iCurrLexState;              // in string or not
+    Token CurrToken;
+    char pstrCurrLexeme[MAX_LEXEME_SIZE];
+
+} Lexer;
+
+// ---- Lexer States ----------------------------------------------------------------------
+
+#define LEX_STATE_UNKNOWN               0       // Unknown lexeme type
+
+#define LEX_STATE_START                 1       // Start state
+
+#define LEX_STATE_INT                   2       // Integer
+#define LEX_STATE_FLOAT                 3       // Float
+
+#define LEX_STATE_IDENT                 4       // Identifier
+
+
+#define LEX_STATE_OP                    5       // Operator
+#define LEX_STATE_DELIM                 6       // Delimiter
+
+#define LEX_STATE_STRING                7       // String value
+#define LEX_STATE_STRING_ESCAPE         8       // Escape sequence
+#define LEX_STATE_STRING_CLOSE_QUOTE    9       // String closing quote
+
+#define LEX_STATE_END_STRING            10
+#define LEX_STATE_NO_STRING             11
+#define LEX_STATE_IN_STRING             12
+
 // ---- Token Types -----------------------------------------------------------------------
-
-#define TOKEN_TYPE_END_OF_STREAM        0       // End of the token stream
-#define TOKEN_TYPE_INVALID              1       // Invalid token
-
-#define TOKEN_TYPE_INT                  2       // Integer
-#define TOKEN_TYPE_FLOAT                3       // Float
-
+#define TOKEN_TYPE_INT                  0       // Integer
+#define TOKEN_TYPE_FLOAT                1       // Float
+#define TOKEN_TYPE_STRING               2       // String
+#define TOKEN_TYPE_QUOTE                3       // "
 #define TOKEN_TYPE_IDENT                4       // Identifier
+#define TOKEN_TYPE_COLON                5       // :
+#define TOKEN_TYPE_OPEN_BRACKET         6       // [
+#define TOKEN_TYPE_CLOSE_BRACKET        7       // ]
+#define TOKEN_TYPE_COMMA                8       // ,
+#define TOKEN_TYPE_OPEN_BRACE           9       // {
+#define TOKEN_TYPE_CLOSE_BRACE          10      // }
+#define TOKEN_TYPE_NEWLINE              11      // \n
+#define TOKEN_TYPE_INSTR                12      // An instruction, MOV
+#define TOKEN_TYPE_SETSTACKSIZE         13      // The setStackSize directive
+#define TOKEN_TYPE_VAR                  14      // Var
+#define TOKEN_TYPE_FUNC                 15      // Func
+#define TOKEN_TYPE_PARAM                16      // Param
+#define TOKEN_TYPE_REG_RETVAL           17      // the _RetVal register
+#define TOKEN_TYPE_INVALID              18      // Error code for invalid tokens
+#define END_OF_TOKEN_STREAM             19       // End of the token stream
 
-#define TOKEN_TYPE_RSRVD_VAR            5       // var/var []
-#define TOKEN_TYPE_RSRVD_TRUE           6       // true
-#define TOKEN_TYPE_RSRVD_FALSE          7       // false
-#define TOKEN_TYPE_RSRVD_IF             8       // if
-#define TOKEN_TYPE_RSRVD_ELSE           9       // else
-#define TOKEN_TYPE_RSRVD_BREAK          10      // break
-#define TOKEN_TYPE_RSRVD_CONTINUE       11      // continue
-#define TOKEN_TYPE_RSRVD_FOR            12      // for
-#define TOKEN_TYPE_RSRVD_WHILE          13      // while
-#define TOKEN_TYPE_RSRVD_FUNC           14      // func
-#define TOKEN_TYPE_RSRVD_RETURN         15      // return
-#define TOKEN_TYPE_RSRVD_HOST           16      // host
-
-#define TOKEN_TYPE_OP                   18      // Operator
-
-#define TOKEN_TYPE_DELIM_COMMA          19      // ,
-#define TOKEN_TYPE_DELIM_OPEN_PAREN     20      // (
-#define TOKEN_TYPE_DELIM_CLOSE_PAREN    21      // )
-#define TOKEN_TYPE_DELIM_OPEN_BRACE     22      // [
-#define TOKEN_TYPE_DELIM_CLOSE_BRACE    23      // ]
-#define TOKEN_TYPE_DELIM_OPEN_CURLY_BRACE   24  // {
-#define TOKEN_TYPE_DELIM_CLOSE_CURLY_BRACE  25  // }
-#define TOKEN_TYPE_DELIM_SEMICOLON      26      // ;
-
-#define TOKEN_TYPE_STRING               27      // String
 
 void StripComments(char *pstrSourceLine);
 
 void TrimWhitespace(char *pstrString);
+
+Token GetNextToken();
+
+int SkipToNextLine();
+
+void ResetLexer();
+
+char GetLookAheadChar();
 
 #endif //ASSEMBLER_LEXER_H
