@@ -14,5 +14,6 @@
 #define MAX_INSTR_LOOKUP_COUNT 256      // The maximum number of instructions the lookup table will hold
 
 #define MAX_LEXEME_SIZE 4096
+#define MAX_SOURCE_LINE_SIZE 1024
 
 #endif //ASSEMBLER_CONSTANTS_H

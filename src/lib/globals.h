@@ -7,7 +7,7 @@
 
 #include "linked_list.h"
 #include "constants.h"
-#include "../table/instruction.h"
+#include "../structure/instruction.h"
 #include "../lexer.h"
 
 // Source code representation
