@@ -5,14 +5,16 @@
 #ifndef ASSEMBLER_GLOBALS_H
 #define ASSEMBLER_GLOBALS_H
 
+#include <stdbool.h>
 #include "linked_list.h"
 #include "constants.h"
 #include "../structure/instruction.h"
-#include "../lexer.h"
 
 // Source code representation
 char **g_ppstrSourceCode = NULL;
 int g_iSourceCodeSize;
+int g_iInstrStreamSize = 0;
+bool g_iIsSetStackSizeFound = FALSE;
 
 
 // The instruction lookup structure
@@ -62,6 +64,19 @@ LinkedList g_FuncTable;
 LinkedList g_SymbolTable;
 LinkedList g_LabelTable;
 LinkedList g_HostAPICallTable;
+
+typedef int Token;
+
+typedef struct _Lexer               // The lexer's state
+{
+    unsigned int iIndex0;
+    unsigned int iIndex1;
+    int iCurrSourceLine;
+    int iCurrLexState;              // in string or not
+    Token CurrToken;
+    char pstrCurrLexeme[MAX_LEXEME_SIZE];
+
+} Lexer;
 
 Lexer g_Lexer;
 

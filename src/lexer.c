@@ -72,7 +72,7 @@ Token GetNextToken() {
     // Move the first index (index0) past the end of the last token,
     // which is marked by the second index (index1).
 
-    g_Lexer.iIdex0 = g_Lexer.iIndex1;
+    g_Lexer.iIndex0 = g_Lexer.iIndex1;
 
     // Make sure we aren't past the end of the current line. If a string is
     // 8 characters long, it's indexed from 0 to 7; therefore, indices 8

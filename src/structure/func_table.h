@@ -19,4 +19,7 @@ typedef struct _FuncNode        // A function table node
     int iLocalDataSize;         // Local data size
 } FuncNode;
 
+int AddFunc(char *pstrName, int iEntryPoint);
+void SetFuncInfo(char *pstrName, int iParamCount, int iLocalDataSize);
+
 #endif //ASSEMBLER_FUNC_TABLE_H

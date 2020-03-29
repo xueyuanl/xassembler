@@ -11,18 +11,8 @@
 #include "lib/globals.h"
 #include "structure/instruction.h"
 
-typedef int Token;
 
-typedef struct _Lexer               // The lexer's state
-{
-    unsigned int iIndex0;
-    unsigned int iIndex1;
-    int iCurrSourceLine;
-    int iCurrLexState;              // in string or not
-    Token CurrToken;
-    char pstrCurrLexeme[MAX_LEXEME_SIZE];
 
-} Lexer;
 
 // ---- Lexer States ----------------------------------------------------------------------
 

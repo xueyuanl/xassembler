@@ -19,4 +19,6 @@ typedef struct _LabelNode       // A label table node
     int iFuncIndex;             // Function in which the label resides
 } LabelNode;
 
+int AddLabelNode(char *pstrIdent, int iTargetIndex, int iFuncIndex);
+
 #endif //ASSEMBLER_LABEL_TABLE_H
