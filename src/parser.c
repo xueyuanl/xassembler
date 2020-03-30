@@ -94,7 +94,7 @@ void parse() {
                 // Set the function flag to true for any future encounters and
                 // reinitialize function tracking variables
                 iIsFuncActive = TRUE;
-                strcpy (pstrCurrFuncName, pstrFuncName);
+                strcpy(pstrCurrFuncName, pstrFuncName);
                 iCurrFuncIndex = iFuncIndex;
                 iCurrFuncParamCount = 0;
                 iCurrFuncParamCount = 0;
@@ -130,7 +130,7 @@ void parse() {
                 if (GetNextToken() != TOKEN_TYPE_IDENT)
                     ExitOnCodeError(ERROR_MSSG_IDENT_EXPECTED);
                 char pstrIdent[MAX_IDENT_SIZE];
-                strcpy (pstrIdent, GetCurrLexeme());
+                strcpy(pstrIdent, GetCurrLexeme());
 
                 // Now determine its size by finding out if it's an array or not, otherwise
                 // default to 1.
@@ -227,7 +227,292 @@ void parse() {
                 break;
             }
 
+            case TOKEN_TYPE_INSTR: {
+                // Make sure we aren't in the global scope, since instructions
+                // can only appear in functions
+
+                if (!iIsFuncActive)
+                    ExitOnCodeError(ERROR_MSSG_GLOBAL_INSTR);
+
+                // Increment the instruction stream size
+
+                ++g_iInstrStreamSize;
+
+                break;
+            }
+            default:
+                if (g_Lexer.CurrToken != TOKEN_TYPE_NEWLINE)
+                    ExitOnCodeError(ERROR_MSSG_INVALID_INPUT);
         }
+        if (!SkipToNextLine())
+            break;
+    }
+
+    // We counted the instructions, so allocate the assembled instruction stream array
+    // so the next phase can begin
+
+    g_pInstrStream = (Instr *) malloc(g_iInstrStreamSize * sizeof(Instr));
+
+    // Initialize every operand list pointer to NULL
+    int iCurrInstrIndex;
+    for (iCurrInstrIndex = 0; iCurrInstrIndex < g_iInstrStreamSize; ++iCurrInstrIndex)
+        g_pInstrStream[iCurrInstrIndex].pOpList = NULL;
+
+    // Set the current instruction index to zero
+    g_iCurrInstrIndex = 0;
+
+    // ---- Perform the second pass over the source
+    // Reset the lexer so we begin at the top of the source again
+    ResetLexer();
+
+    while (TRUE) {
+        if (GetNextToken() == END_OF_TOKEN_STREAM)
+            break;
+        switch (g_Lexer.CurrToken) {
+            case TOKEN_TYPE_FUNC: {
+                GetNextToken();
+                // Use the identifier (the current lexeme) to get it's corresponding function
+                // from the table
+
+                pCurrFunc = GetFuncByName(GetCurrLexeme());
+
+                // set the active function flag
+                iIsFuncActive = TRUE;
+
+                // Set the parameter count to zero, since we'll need to count parameters as
+                // we parse Param directives
+                iCurrFuncParamCount = 0;
+
+                // Save the function's index
+                iCurrFuncIndex = pCurrFunc->iIndex;
+
+                // Read any number of line breaks until the opening brace is found
+                while (GetNextToken() == TOKEN_TYPE_NEWLINE);
+                break;
+            }
+
+            case TOKEN_TYPE_CLOSE_BRACE: {
+                iIsFuncActive = FALSE;
+
+                //main func
+                if (strcmp(pCurrFunc->pstrName, MAIN_FUNC_NAME) == 0) {
+                    g_pInstrStream[g_iCurrInstrIndex].iOpCode = INSTR_EXIT;
+                    g_pInstrStream[g_iCurrInstrIndex].iOpCount = 1;
+
+                    g_pInstrStream[g_iCurrInstrIndex].pOpList = (Operand *) malloc(sizeof(Operand));
+                    g_pInstrStream[g_iCurrInstrIndex].pOpList[0].iType = OP_TYPE_INT;
+                    g_pInstrStream[g_iCurrInstrIndex].pOpList[0].iIntLiteral = 0;
+                } else {
+                    g_pInstrStream[g_iCurrInstrIndex].iOpCode = ç;
+                    g_pInstrStream[g_iCurrInstrIndex].iOpCount = 0;
+                    g_pInstrStream[g_iCurrInstrIndex].pOpList = NULL;
+                }
+                g_iCurrInstrIndex++;
+                break;
+            }
+
+            case TOKEN_TYPE_PARAM: {
+                if (GetNextToken() != TOKEN_TYPE_IDENT)
+                    ExitOnCodeError(ERROR_MSSG_IDENT_EXPECTED);
+                char *pstrIdent = GetCurrLexeme();
+
+                // Calculate the parameter's stack index
+                int iStackIndex = -(pCurrFunc->iLocalDataSize + 2 + (iCurrFuncParamCount + 1));
+
+                // Add the parameter to the symbol table
+                if (AddSymbolNode(pstrIdent, 1, iStackIndex, iCurrFuncIndex) == -1)
+                    ExitOnCodeError(ERROR_MSSG_IDENT_REDEFINITION);
+                // Increment the current parameter count
+                ++iCurrFuncParamCount;
+                break;
+            }
+
+            case TOKEN_TYPE_INSTR: {
+                // Get the instruction's info using the current lexeme (the mnemonic )
+                GetInstrByMnemonic(GetCurrLexeme(), &CurrInstr);
+
+                // Write the opcode to the stream
+                g_pInstrStream[g_iCurrInstrIndex].iOpCode = CurrInstr.iOpCode;
+
+                // Write the operand count to the stream
+                g_pInstrStream[g_iCurrInstrIndex].iOpCount = CurrInstr.iOpCount;
+
+                // Allocate space to hold the operand list
+                Operand *pOpList = (Operand *) malloc(CurrInstr.iOpCount * sizeof(Operand));
+
+                int iCurrOpIndex;
+                for (iCurrOpIndex = 0; iCurrOpIndex < CurrInstr.iOpCount; ++iCurrOpIndex) {
+                    OpTypes CurrOpTypes = CurrInstr.OpList[iCurrOpIndex];
+                    Token InitOpToken = GetNextToken();
+                    switch (InitOpToken) {
+                        case TOKEN_TYPE_INT: {
+                            if (CurrOpTypes & OP_FLAG_TYPE_INT) {
+                                pOpList[iCurrOpIndex].iType = OP_TYPE_INT;
+                                pOpList[iCurrOpIndex].iIntLiteral = atoi(GetCurrLexeme());
+                            } else {
+                                ExitOnCodeError(ERROR_MSSG_INVALID_OP);
+                            }
+                            break;
+                        }
+
+                        case TOKEN_TYPE_FLOAT: {
+                            if (CurrOpTypes & OP_FLAG_TYPE_FLOAT) {
+                                pOpList[iCurrOpIndex].iType = OP_TYPE_FLOAT;
+                                pOpList[iCurrOpIndex].fFloatLiteral = (float) atof(GetCurrLexeme());
+                            } else {
+                                ExitOnCodeError(ERROR_MSSG_INVALID_OP);
+                            }
+                            break;
+                        }
+
+                        case TOKEN_TYPE_QUOTE: {
+                            if (CurrOpTypes & OP_FLAG_TYPE_STRING) {
+
+                                GetNextToken();
+
+                                if (g_Lexer.CurrToken == TOKEN_TYPE_QUOTE) {
+                                    // empty string
+                                    pOpList[iCurrOpIndex].iType = OP_TYPE_INT;
+                                    pOpList[iCurrOpIndex].iIntLiteral = 0;
+                                } else if (g_Lexer.CurrToken == TOKEN_TYPE_STRING) {
+                                    char *pstrString = GetCurrLexeme();
+                                    // Add the string to the table, or get the index of
+                                    // the existing copy
+                                    int iStringIndex = AddString(&g_StringTable, pstrString);
+                                    pOpList[iCurrOpIndex].iType = OP_TYPE_STRING_INDEX;
+                                    pOpList[iCurrOpIndex].iStringTableIndex = iStringIndex;
+                                    if (GetNextToken() != TOKEN_TYPE_QUOTE)
+                                        ExitOnCharExpectedError('\\');
+                                } else {
+                                    ExitOnCodeError(ERROR_MSSG_INVALID_STRING);
+                                }
+
+                            } else {
+                                ExitOnCodeError(ERROR_MSSG_INVALID_OP);
+
+                            }
+                            break;
+                        }
+
+                        case TOKEN_TYPE_REG_RETVAL: {
+                            if (CurrOpTypes & OP_FLAG_TYPE_REG) {
+
+                                // Set a register type
+                                pOpList[iCurrOpIndex].iType = OP_TYPE_REG;
+                                pOpList[iCurrOpIndex].iReg = 0;
+                            } else
+                                ExitOnCodeError(ERROR_MSSG_INVALID_OP);
+                            break;
+                        }
+
+                        case TOKEN_TYPE_IDENT: {
+                            if (CurrOpTypes & OP_FLAG_TYPE_MEM_REF) {
+                                char pstrIdent[MAX_IDENT_SIZE];
+                                strcpy (pstrIdent, GetCurrLexeme());
+                                if (!GetSymbolByIdent(pstrIdent, iCurrFuncIndex))
+                                    ExitOnCodeError(ERROR_MSSG_UNDEFINED_IDENT);
+                                int iBaseIndex = GetStackIndexByIdent(pstrIdent, iCurrFuncIndex);
+                                if (GetLookAheadChar() != '[') {
+
+                                    if (GetSizeByIdent(pstrIdent, iCurrFuncIndex) > 1)
+                                        ExitOnCodeError(ERROR_MSSG_INVALID_ARRAY_NOT_INDEXED);
+
+                                    pOpList[iCurrOpIndex].iType = OP_TYPE_ABS_STACK_INDEX;
+                                    pOpList[iCurrOpIndex].iIntLiteral = iBaseIndex;
+                                } else {
+
+                                    if (GetNextToken() != TOKEN_TYPE_OPEN_BRACKET)
+                                        ExitOnCharExpectedError('[');
+                                    Token IndexToken = GetNextToken();
+
+                                    if (IndexToken == TOKEN_TYPE_INT) {
+                                        int iOffsetIndex = atoi(GetCurrLexeme());
+
+                                        pOpList[iCurrOpIndex].iType = OP_TYPE_ABS_STACK_INDEX;
+                                        pOpList[iCurrOpIndex].iStackIndex = iBaseIndex + iOffsetIndex;
+
+                                    } else if (IndexToken == TOKEN_TYPE_IDENT) {
+                                        char *pstrIndexIdent = GetCurrLexeme();
+                                        if (!GetSymbolByIdent(pstrIndexIdent, iCurrFuncIndex))
+                                            ExitOnCodeError(ERROR_MSSG_UNDEFINED_IDENT);
+
+                                        if (GetSizeByIdent(pstrIndexIdent, iCurrFuncIndex) > 1)
+                                            ExitOnCodeError(ERROR_MSSG_INVALID_ARRAY_INDEX);
+                                        int iOffsetIndex = GetStackIndexByIdent(pstrIndexIdent, iCurrFuncIndex);
+                                        pOpList[iCurrOpIndex].iType = OP_TYPE_REL_STACK_INDEX;
+                                        pOpList[iCurrOpIndex].iStackIndex = iBaseIndex;
+                                        pOpList[iCurrOpIndex].iOffsetIndex = iOffsetIndex;
+                                    } else {
+                                        ExitOnCodeError(ERROR_MSSG_INVALID_ARRAY_INDEX);
+                                    }
+
+                                    if (GetNextToken() != TOKEN_TYPE_CLOSE_BRACKET)
+                                        ExitOnCharExpectedError('[');
+                                }
+                            }
+
+                            if (CurrOpTypes & OP_FLAG_TYPE_LINE_LABEL) {
+                                char *pstrLabelIdent = GetCurrLexeme();
+                                LabelNode *pLabel = GetLabelByIdent(pstrLabelIdent, iCurrFuncIndex);
+
+                                if (!pLabel)
+                                    ExitOnCodeError(ERROR_MSSG_UNDEFINED_LINE_LABEL);
+
+                                pOpList[iCurrOpIndex].iType = OP_TYPE_INSTR_INDEX;
+                                pOpList[iCurrOpIndex].iInstrIndex = pLabel->iTargetIndex;
+                            }
+
+                            if (CurrOpTypes & OP_FLAG_TYPE_FUNC_NAME) {
+                                // Get the current lexeme, which is the function name
+                                char *pstrFuncName = GetCurrLexeme();
+
+                                // Use the function name to get the function's information
+                                FuncNode *pFunc = GetFuncByName(pstrFuncName);
+
+                                // Make sure the function exists
+                                if (!pFunc)
+                                    ExitOnCodeError(ERROR_MSSG_UNDEFINED_FUNC);
+
+                                // Set the operand type to function index and set its data
+                                // field
+                                pOpList[iCurrOpIndex].iType = OP_TYPE_FUNC_INDEX;
+                                pOpList[iCurrOpIndex].iFuncIndex = pFunc->iIndex;
+                            }
+                            if (CurrOpTypes & OP_FLAG_TYPE_HOST_API_CALL) {
+                                // Get the current lexeme, which is the host API call
+
+                                char *pstrHostAPICall = GetCurrLexeme();
+
+                                // Add the call to the table, or get the index of the
+                                // existing copy
+
+                                int iIndex = AddString(&g_HostAPICallTable, pstrHostAPICall);
+
+                                // Set the operand type to host API call index and set its
+                                // data field
+
+                                pOpList[iCurrOpIndex].iType = OP_TYPE_HOST_API_CALL_INDEX;
+                                pOpList[iCurrOpIndex].iHostAPICallIndex = iIndex;
+                            }
+                            break;
+                        }
+                        default:
+                            ExitOnCodeError(ERROR_MSSG_INVALID_OP);
+                    }
+                    if ( iCurrOpIndex < CurrInstr.iOpCount - 1 )
+                        if ( GetNextToken () != TOKEN_TYPE_COMMA )
+                            ExitOnCharExpectedError ( ',' );
+                }
+                //if ( GetNextToken () != TOKEN_TYPE_NEWLINE )
+                //    ExitOnCodeError ( ERROR_MSSG_INVALID_INPUT );
+
+                g_pInstrStream [ g_iCurrInstrIndex ].pOpList = pOpList;
+                ++ g_iCurrInstrIndex;
+                break;
+            }
+        }
+        if ( ! SkipToNextLine () )
+            break;
     }
 
 }

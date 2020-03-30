@@ -8,4 +8,6 @@
 #include <string.h>
 #include "../lib/linked_list.h"
 
+
+int AddString(LinkedList *pList, char *pstrString);
 #endif //ASSEMBLER_STRING_TABLE_H

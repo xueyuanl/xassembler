@@ -39,13 +39,14 @@ typedef struct _Op              // An assembled operand
 
 typedef struct _Instr           // An instruction
 {
-    int IOpCode;                // OpCode
+    int iOpCode;                // OpCode
     int iOpCount;               // Number of operands
     Operand *pOpList;           // Pointer to operand list
 } Instr;
 // The assembled instruction stream
 Instr *g_pInstrStream = NULL;
 int g_instrStreamSize;
+int g_iCurrInstrIndex;
 
 
 typedef struct _ScriptHeader    // Script header data

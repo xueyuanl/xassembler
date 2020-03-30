@@ -21,6 +21,8 @@ typedef struct _SymbolNode          // A symbol table node
     int iFuncIndex;                 // Function in which the symbol resides
 } SymbolNode;
 
+SymbolNode *GetSymbolByIdent(char *pstrIdent, int iFuncIndex);
+
 int AddSymbolNode(char *pstrIdent, int iSize, int iStackIndex, int iFuncIndex);
 
 int GetStackIndexByIdent(char *pstrIdent, int iFuncIndex);
