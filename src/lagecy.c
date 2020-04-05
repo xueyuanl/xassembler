@@ -18,7 +18,7 @@ PyObject *PrintString(PyObject *pSelf, PyObject *pParams) {
 
 int main() {
     char a[] = "   This is a string.   ";
-    TrimWhitespace(a);
+    TrimWhiteSpace(a);
 }
 
 int main_py(int argc, const char *argv[]) {

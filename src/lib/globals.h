@@ -6,19 +6,22 @@
 #define ASSEMBLER_GLOBALS_H
 
 #include <stdbool.h>
+#include <stdio.h>
 #include "linked_list.h"
 #include "constants.h"
 #include "../structure/instruction.h"
 
 // Source code representation
-char **g_ppstrSourceCode = NULL;
-int g_iSourceCodeSize;
-int g_iInstrStreamSize = 0;
-bool g_iIsSetStackSizeFound = FALSE;
-
+extern char **g_ppstrSourceCode;
+extern int g_iSourceCodeSize;
+extern int g_iInstrStreamSize;
+extern bool g_iIsSetStackSizeFound;
+extern int g_iSourceFileLine;
+extern char g_pstrExecFilename[MAX_SOURCE_LINE_SIZE];
+extern FILE *g_pSourceFile;
 
 // The instruction lookup structure
-Instruction g_InstrTable[MAX_INSTR_LOOKUP_COUNT];
+extern Instruction g_InstrTable[MAX_INSTR_LOOKUP_COUNT];
 
 typedef struct _Op              // An assembled operand
 {
@@ -44,9 +47,9 @@ typedef struct _Instr           // An instruction
     Operand *pOpList;           // Pointer to operand list
 } Instr;
 // The assembled instruction stream
-Instr *g_pInstrStream = NULL;
-int g_instrStreamSize;
-int g_iCurrInstrIndex;
+extern Instr *g_pInstrStream;
+extern int g_instrStreamSize;
+extern int g_iCurrInstrIndex;
 
 
 typedef struct _ScriptHeader    // Script header data
@@ -57,14 +60,14 @@ typedef struct _ScriptHeader    // Script header data
     int iMainFuncIndex;         // _Main()'s function index
 } ScriptHeader;
 // The scrip header
-ScriptHeader g_ScriptHeader;
+extern ScriptHeader g_ScriptHeader;
 
 // The main tables
-LinkedList g_StringTable;
-LinkedList g_FuncTable;
-LinkedList g_SymbolTable;
-LinkedList g_LabelTable;
-LinkedList g_HostAPICallTable;
+extern LinkedList g_StringTable;
+extern LinkedList g_FuncTable;
+extern LinkedList g_SymbolTable;
+extern LinkedList g_LabelTable;
+extern LinkedList g_HostAPICallTable;
 
 typedef int Token;
 
@@ -79,6 +82,6 @@ typedef struct _Lexer               // The lexer's state
 
 } Lexer;
 
-Lexer g_Lexer;
+extern Lexer g_Lexer;
 
 #endif //ASSEMBLER_GLOBALS_H

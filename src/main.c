@@ -2,41 +2,8 @@
 #include <stdio.h>
 #include "lib/globals.h"
 #include "parser.h"
-
-void InitInstrTable() {
-    int iInstrIndex;
-
-#define ENTRY(InstrName, InstrCode) \
-    iInstrIndex = AddInstrLookup (#InstrName, InstrCode, 1 );
-
-    ZeroOperatorInstrState
-#undef ENTRY
-
-#define ENTRY(InstrName, InstrCode, InstrFlag) \
-    iInstrIndex = AddInstrLookup (#InstrName, InstrCode, 1 ); \
-    SetOpType ( iInstrIndex, 0, InstrFlag);
-
-            OneOperatorInstrState
-#undef ENTRY
-
-#define ENTRY(InstrName, InstrCode, InstrFlag1, InstrFlag2) \
-    iInstrIndex = AddInstrLookup (#InstrName, InstrCode, 2 ); \
-    SetOpType ( iInstrIndex, 0, InstrFlag1);  \
-    SetOpType ( iInstrIndex, 1, InstrFlag2);
-
-    TwoOperatorInstrState
-#undef ENTRY
-
-#define ENTRY(InstrName, InstrCode, InstrFlag1, InstrFlag2, InstrFlag3) \
-    iInstrIndex = AddInstrLookup (#InstrName, InstrCode, 3 ); \
-    SetOpType ( iInstrIndex, 0, InstrFlag1);  \
-    SetOpType ( iInstrIndex, 1, InstrFlag2);    \
-    SetOpType ( iInstrIndex, 2, InstrFlag3);
-
-            ThreeOperatorInstrState
-#undef ENTRY
-    g_iInstrTableLength = iInstrIndex + 1;
-}
+#include "lexer.h"
+#include "structure/instruction.h"
 
 void Init() {
     // Initialize the master instruction lookup table
@@ -85,6 +52,8 @@ int LoadSourceFile(char *FileName) {
         strcpy(g_ppstrSourceCode[line], tmparray);
         line++;
     }
+    fclose(g_pSourceFile);
+    return line;
 }
 
 void BuildXSE() {
@@ -135,7 +104,7 @@ void BuildXSE() {
     for (int iCurrInstrIndex = 0; iCurrInstrIndex < g_iInstrStreamSize; ++iCurrInstrIndex) {
         // Write the opcode (2 bytes)
 
-        short sOpcode = g_pInstrStream[iCurrInstrIndex].iOpcode;
+        short sOpcode = g_pInstrStream[iCurrInstrIndex].iOpCode;
         fwrite(&sOpcode, 2, 1, pExecFile);
 
         // Write the operand count (1 byte)
@@ -148,7 +117,7 @@ void BuildXSE() {
         for (int iCurrOpIndex = 0; iCurrOpIndex < iOpCount; ++iCurrOpIndex) {
             // Make a copy of the operand pointer for convinience
 
-            Op CurrOp = g_pInstrStream[iCurrInstrIndex].pOpList[iCurrOpIndex];
+            Operand CurrOp = g_pInstrStream[iCurrInstrIndex].pOpList[iCurrOpIndex];
 
             // Create a character for holding operand types (1 byte)
 
@@ -373,7 +342,7 @@ void PrintTableInfo() {
 
     printf("Instruction Stream\n");
     for (i = 0; i < g_iInstrStreamSize; i++) {
-        printf("OP:%d COUNT:%d\n", g_pInstrStream[i].iOpcode, g_pInstrStream[i].iOpCount);
+        printf("OP:%d COUNT:%d\n", g_pInstrStream[i].iOpCode, g_pInstrStream[i].iOpCount);
     }
 }
 

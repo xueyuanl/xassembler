@@ -62,7 +62,7 @@
 
 void StripComments(char *pstrSourceLine);
 
-void TrimWhitespace(char *pstrString);
+void TrimWhiteSpace(char *pstrString);
 
 Token GetNextToken();
 

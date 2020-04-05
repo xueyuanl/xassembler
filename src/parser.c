@@ -303,7 +303,7 @@ void parse() {
                     g_pInstrStream[g_iCurrInstrIndex].pOpList[0].iType = OP_TYPE_INT;
                     g_pInstrStream[g_iCurrInstrIndex].pOpList[0].iIntLiteral = 0;
                 } else {
-                    g_pInstrStream[g_iCurrInstrIndex].iOpCode = ç;
+                    g_pInstrStream[g_iCurrInstrIndex].iOpCode = INSTR_RET;
                     g_pInstrStream[g_iCurrInstrIndex].iOpCount = 0;
                     g_pInstrStream[g_iCurrInstrIndex].pOpList = NULL;
                 }

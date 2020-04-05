@@ -32,7 +32,7 @@ void StripComments(char *pstrSourceLine) {
 
 }
 
-void TrimWhitespace(char *pstrString) {
+void TrimWhiteSpace(char *pstrString) {
     unsigned int iStringLength = strlen(pstrString);
     unsigned int iPadLength;
     unsigned int iCurrCharIndex;
@@ -119,7 +119,7 @@ Token GetNextToken() {
     // Index1 each time
     while (TRUE) {
         // Are we currently scanning through a string?
-        if (g_Lexer.iCurrLexState = LEX_STATE_IN_STRING) {
+        if (g_Lexer.iCurrLexState == LEX_STATE_IN_STRING) {
             // If we're at the end of the line, return an invalid token
             // since the string has no ending double-quote on the line
             if (g_Lexer.iIndex1 >= strlen(g_ppstrSourceCode[g_Lexer.iCurrSourceLine])) {
@@ -349,8 +349,11 @@ char GetLookAheadChar() {
             // look-ahead
             if (!IsCharWhitespace(g_ppstrSourceCode[iCurrSourceLine][iIndex]))
                 break;
+            // It is whitespace, however, so move to the next character and continue scanning
+
+            ++ iIndex;
         }
-        // Return whatever character the loop left iIndex at
-        return g_ppstrSourceCode[iCurrSourceLine][iIndex];
     }
+    // Return whatever character the loop left iIndex at
+    return g_ppstrSourceCode[iCurrSourceLine][iIndex];
 }
