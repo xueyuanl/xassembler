@@ -369,17 +369,17 @@ void ShutDown() {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc == 1) {
-        printf("need a file!\n");
-        exit(1);
-    }
-
-    if (argc == 3) {
-        strcpy(g_pstrExecFilename, argv[2]);
-    }
+//    /*if (argc == 1) {
+////        printf("need a file!\n");
+////        exit(1);
+////    }
+////
+////    if (argc == 3) {
+////        strcpy(g_pstrExecFilename, argv[2]);
+////    }*/
 
     Init();
-    g_iSourceFileLine = LoadSourceFile(argv[1]);
+    g_iSourceFileLine = LoadSourceFile("script");
     parse();
     PrintTableInfo();
     BuildXSE();

@@ -25,7 +25,10 @@ int IsCharWhitespace(char c) {
 int IsCharIdent(char c) {
     // Return true if the character is between 0 or 9 inclusive or is
     // an uppercase or lowercase letter
-    if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c >= '_')
+    if ((c >= '0' && c <= '9') ||
+        (c >= 'A' && c <= 'Z') ||
+        (c >= 'a' && c <= 'z') ||
+        c == '_')
         return TRUE;
     else
         return FALSE;
@@ -34,7 +37,10 @@ int IsCharIdent(char c) {
 // Determines if a character is part of a delimiter
 int IsCharDelimiter(char c) {
     // Return true if the character is a delimiter
-    if (c == ':' || c == ',' || c == '"' || c == '[' || c == ']' || c == '{' || c == '}' || IsCharWhitespace(c))
+    if (c == ':' || c == ',' || c == '"' ||
+        c == '[' || c == ']' ||
+        c == '{' || c == '}' ||
+        IsCharWhitespace(c) || c == '\n')
         return TRUE;
     else
         return FALSE;

@@ -56,7 +56,8 @@ void TrimWhiteSpace(char *pstrString) {
         }
 
         // Terminate string at the start of right hand whitespace
-        for (iCurrCharIndex = iStringLength - 1; iCurrCharIndex > 0; --iCurrCharIndex) {
+        // fix: should be '>= 0' not '> 0'
+        for (iCurrCharIndex = iStringLength - 1; iCurrCharIndex >= 0; --iCurrCharIndex) {
             if (!IsCharWhitespace(pstrString[iCurrCharIndex])) {
                 pstrString[iCurrCharIndex + 1] = '\0';
                 break;
@@ -290,7 +291,7 @@ int SkipToNextLine() {
     ++g_Lexer.iCurrSourceLine;
 
     // Return FALSE if we've gone past the end of the source code
-    if (g_Lexer.iCurrSourceLine >= g_iSourceCodeSize)
+    if (g_Lexer.iCurrSourceLine >= g_iSourceFileLine)
         return FALSE;
 
     // Set both indices to point to the start of the string
@@ -298,7 +299,7 @@ int SkipToNextLine() {
     g_Lexer.iIndex1 = 0;
 
     // Turn off string lexeme mode, since strings can't span multiple lines
-    g_Lexer.iCurrSourceLine = LEX_STATE_NO_STRING;
+    g_Lexer.iCurrLexState = LEX_STATE_NO_STRING;
 
     // Return TRUE to indicate success
     return TRUE;
@@ -311,7 +312,8 @@ void ResetLexer() {
     // Set both indices to point to the start of the string
     g_Lexer.iIndex0 = 0;
     g_Lexer.iIndex1 = 0;
-    // Set the token type to invalid, since a token hasn't been read yet g_Lexer.CurrToken = TOKEN_TYPE_INVALID;
+    // Set the token type to invalid, since a token hasn't been read yet
+    g_Lexer.CurrToken = TOKEN_TYPE_INVALID;
     // Set the lexing state to no strings
     g_Lexer.iCurrLexState = LEX_STATE_NO_STRING;
 }

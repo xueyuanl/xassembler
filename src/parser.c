@@ -97,7 +97,6 @@ void parse() {
                 strcpy(pstrCurrFuncName, pstrFuncName);
                 iCurrFuncIndex = iFuncIndex;
                 iCurrFuncParamCount = 0;
-                iCurrFuncParamCount = 0;
                 iCurrFuncLocalDataSize = 0;
 
                 // Read any number of line breaks until the opening brace is found
@@ -182,22 +181,17 @@ void parse() {
             }
 
             case TOKEN_TYPE_PARAM: {
-                // Read the next token to get the identifier
-                if (GetNextToken() != TOKEN_TYPE_IDENT)
-                    ExitOnCodeError(ERROR_MSSG_IDENT_EXPECTED);
+                if ( ! iIsFuncActive )
+                    ExitOnCodeError ( ERROR_MSSG_GLOBAL_PARAM );
 
-                // Read the identifier, which is the current lexeme
-                char *pstrIdent = GetCurrLexeme();
+                if ( strcmp ( pstrCurrFuncName, MAIN_FUNC_NAME ) == 0 )
+                    ExitOnCodeError ( ERROR_MSSG_MAIN_PARAM );
 
-                // Calculate the parameter's stack index
-                int iStackIndex = -(pCurrFunc->iLocalDataSize + 2 + (iCurrFuncParamCount + 1));
 
-                // Add the parameter to the symbol table
-                if (AddSymbolNode(pstrIdent, 1, iStackIndex, iCurrFuncIndex) == -1)
-                    ExitOnCodeError(ERROR_MSSG_IDENT_REDEFINITION);
+                if(GetNextToken() != TOKEN_TYPE_IDENT)
+                    ExitOnCodeError ( ERROR_MSSG_IDENT_EXPECTED );
 
-                // Increment the current parameter count
-                ++iCurrFuncParamCount;
+                iCurrFuncParamCount ++;
                 break;
             }
 
