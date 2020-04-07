@@ -30,3 +30,7 @@ FILE *g_pSourceFile = NULL;
 Instruction g_InstrTable[MAX_INSTR_LOOKUP_COUNT];
 
 Lexer g_Lexer;
+
+// Token Stream
+LinkedList g_TokenStream;
+LinkedListNode *g_pCurrTokenNode = NULL;

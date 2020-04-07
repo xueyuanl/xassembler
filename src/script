@@ -15,7 +15,8 @@ Func MyAdd
     Var    Sum
     Mov Sum, X
     Add Sum, Y
-    ; Put the result in the _RetVal register Mov _RetVal, Sum
+    ; Put the result in the _RetVal register
+    Mov _RetVal, Sum
     ; Remember, Ret will be automatically added
 }
 ; Just a bizarre function that does nothing in particular
@@ -29,7 +30,8 @@ Func MyFunc
     Push 32
     ; Next we make the function call itself
     Call MyAdd
-    ; And finally, we grab the return value from _RetVal Mov MySum, _RetVal
+    ; And finally, we grab the return value from _RetVal
+    Mov MySum, _RetVal
     ; Multiply MySum by 2 and store it in GlobalVar
     Mul MySum, 2
     Mov GlobalVar, MySum

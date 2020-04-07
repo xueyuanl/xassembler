@@ -75,7 +75,7 @@ void BuildXSE() {
     fwrite(&cVersionMajor, 1, 1, pExecFile);
     printf("Major Version: %d\n", cVersionMajor);
     fwrite(&cVersionMinor, 1, 1, pExecFile);
-    printf("Minor Version: %c\n", cVersionMinor);
+    printf("Minor Version: %d\n", cVersionMinor);
 
     // Write the stack size (4 bytes)
     fwrite(&g_ScriptHeader.iStackSize, 4, 1, pExecFile);
@@ -388,6 +388,15 @@ void ShutDown() {
 
 }
 
+void PrintTokenStream() {
+    LinkedListNode *p = g_TokenStream.pHead;
+    while (p->pNext != NULL) {
+        p = p->pNext;
+        TokenNode *t = (TokenNode *) p->pData;
+        printf("%s, ", t->lexeme);
+    }
+}
+
 int main(int argc, char *argv[]) {
 //    /*if (argc == 1) {
 ////        printf("need a file!\n");
@@ -399,9 +408,16 @@ int main(int argc, char *argv[]) {
 ////    }*/
 
     Init();
-    g_iSourceFileLine = LoadSourceFile("/Users/hsuehyuan/mnt/pi/assembler/src/script");
+    g_iSourceFileLine = LoadSourceFile("/home/pat/workspace/xassembler/src/script");
+
+    _lexer();
+
+    // PrintTokenStream();
+
     parse();
+
     //PrintTableInfo();
+
     BuildXSE();
 
     ShutDown();

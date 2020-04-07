@@ -10,6 +10,7 @@
 #include "linked_list.h"
 #include "constants.h"
 #include "../structure/instruction.h"
+#include "../structure/token_stream.h"
 
 // Source code representation
 extern char **g_ppstrSourceCode;
@@ -83,5 +84,9 @@ typedef struct _Lexer               // The lexer's state
 } Lexer;
 
 extern Lexer g_Lexer;
+
+// Token Stream
+extern LinkedList g_TokenStream;
+extern LinkedListNode *g_pCurrTokenNode;
 
 #endif //ASSEMBLER_GLOBALS_H

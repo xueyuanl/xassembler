@@ -68,6 +68,14 @@ void TrimWhiteSpace(char *pstrString) {
 
 
 Token GetNextToken() {
+    g_pCurrTokenNode = g_pCurrTokenNode->pNext;
+    if (g_pCurrTokenNode == NULL)
+        return END_OF_TOKEN_STREAM;
+    TokenNode *tokenNode = (TokenNode *) g_pCurrTokenNode->pData;
+    return tokenNode->iType;
+}
+
+Token _GetNextToken() {
     // ---- Lexeme Extraction
 
     // Move the first index (index0) past the end of the last token,
@@ -86,7 +94,7 @@ Token GetNextToken() {
         // If so, skip to the next line but make sure we don't go past the
         // end of the file. SkipToNextLine () will return FALSE if we hit
         // the end of the file, which is the end of the token stream.
-        if (!SkipToNextLine())
+        if (!_SkipToNextLine())
             return END_OF_TOKEN_STREAM;
     }
 
@@ -286,7 +294,7 @@ Token GetNextToken() {
     return g_Lexer.CurrToken;
 }
 
-int SkipToNextLine() {
+int _SkipToNextLine() {
     // Increment the current line
     ++g_Lexer.iCurrSourceLine;
 
@@ -306,7 +314,7 @@ int SkipToNextLine() {
 
 }
 
-void ResetLexer() {
+void InitLexer() {
     // Set the current line to the start of the file
     g_Lexer.iCurrSourceLine = 0;
     // Set both indices to point to the start of the string
@@ -318,44 +326,19 @@ void ResetLexer() {
     g_Lexer.iCurrLexState = LEX_STATE_NO_STRING;
 }
 
+Token GetLookAheadToken() {
+    TokenNode *tokenNode = (TokenNode *) g_pCurrTokenNode->pNext->pData;
+    return tokenNode->iType;
+}
 
-char GetLookAheadChar() {
-    // We don't actually want to move the lexer's indices, so we'll
-    // make a copy of them
+void _lexer() {
+    InitLinkedList(&g_TokenStream);
+    // grantee first invoke GetNextToken() to get the genuine first Token.
+    AddToken(HEAD_OF_TOKEN_STREAM, "Token Placeholder");
 
-    int iCurrSourceLine = g_Lexer.iCurrSourceLine;
-    unsigned int iIndex = g_Lexer.iIndex1;
+    InitLexer();
 
-    // If the next lexeme is not a string, scan past any potential
-    // leading whitespace
-
-    if (g_Lexer.iCurrLexState != LEX_STATE_IN_STRING) {
-        // Scan through the whitespace and check for the end of the line
-        while (TRUE) {
-            // If we've passed the end of the line, skip to the next
-            // line and reset the index to zero
-            if (iIndex >= strlen(g_ppstrSourceCode[iCurrSourceLine])) {
-                // Increment the source code index
-                iCurrSourceLine += 1;
-                // If we've passed the end of the source file, just
-                // return a null character
-                if (iCurrSourceLine >= g_iSourceCodeSize)
-                    return 0;
-                // Otherwise, reset the index to the first character on
-                // the new line
-                iIndex = 0;
-            }
-
-            // If the current character is not whitespace, return it, since
-            // it's the first character of the next lexeme and is thus the
-            // look-ahead
-            if (!IsCharWhitespace(g_ppstrSourceCode[iCurrSourceLine][iIndex]))
-                break;
-            // It is whitespace, however, so move to the next character and continue scanning
-
-            ++ iIndex;
-        }
+    while (_GetNextToken() != END_OF_TOKEN_STREAM) {
+        AddToken(g_Lexer.CurrToken, g_Lexer.pstrCurrLexeme);
     }
-    // Return whatever character the loop left iIndex at
-    return g_ppstrSourceCode[iCurrSourceLine][iIndex];
 }

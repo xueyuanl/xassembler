@@ -10,7 +10,7 @@
 #include "lib/linked_list.h"
 #include "lib/globals.h"
 #include "structure/instruction.h"
-
+#include "structure/token_stream.h"
 
 
 
@@ -57,19 +57,26 @@
 #define TOKEN_TYPE_PARAM                16      // Param
 #define TOKEN_TYPE_REG_RETVAL           17      // the _RetVal register
 #define TOKEN_TYPE_INVALID              18      // Error code for invalid tokens
-#define END_OF_TOKEN_STREAM             19       // End of the token stream
+#define END_OF_TOKEN_STREAM             19      // End of the token stream
+#define HEAD_OF_TOKEN_STREAM            20      // Placeholder of the first token stream
 
 
 void StripComments(char *pstrSourceLine);
 
 void TrimWhiteSpace(char *pstrString);
 
+char *GetCurrLexeme();
+
+Token GetCurrTokenType();
+
 Token GetNextToken();
 
-int SkipToNextLine();
+void InitLexer();
 
-void ResetLexer();
+Token GetLookAheadToken();
 
-char GetLookAheadChar();
+int _SkipToNextLine();
+
+void _lexer();
 
 #endif //ASSEMBLER_LEXER_H

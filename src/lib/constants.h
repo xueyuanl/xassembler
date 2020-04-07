@@ -17,7 +17,7 @@
 #define MAX_SOURCE_LINE_SIZE        1024
 #define MAX_SOURCE_LIEN_NUM         1024
 
-#define MAIN_FUNC_NAME              "_Main()"
+#define MAIN_FUNC_NAME              "_MAIN"     // the lexer will convert the _Main to up case
 
 #define XSE_ID_STRING               "XSE0"      // Written to the file to state it's
 // validity

@@ -6,7 +6,23 @@
 
 char *GetCurrLexeme() {
     // Simply return the pointer rather than making a copy
-    return g_Lexer.pstrCurrLexeme;
+    TokenNode *pTokenNode = (TokenNode *) g_pCurrTokenNode->pData;
+    return pTokenNode->lexeme;
+}
+
+Token GetCurrTokenType() {
+    TokenNode *pTokenNode = (TokenNode *) g_pCurrTokenNode->pData;
+    return pTokenNode->iType;
+}
+
+int SkipToNextLine() {
+    Token token = GetCurrTokenType();
+    while(token != TOKEN_TYPE_NEWLINE){
+        token = GetNextToken();
+        if (token == END_OF_TOKEN_STREAM)
+            return FALSE;
+    }
+    return TRUE;
 }
 
 void parse() {
@@ -31,15 +47,15 @@ void parse() {
     // when dealing with instructions.
     Instruction CurrInstr;
 
-    // Reset the lexer
-    ResetLexer();
+    // point to the first token
+    g_pCurrTokenNode = g_TokenStream.pHead;
 
     while (TRUE) {
-        if (GetNextToken() == END_OF_TOKEN_STREAM)
+        Token CurrToken = GetNextToken();
+        if (CurrToken == END_OF_TOKEN_STREAM)
             break;
 
-
-        switch (g_Lexer.CurrToken) {
+        switch (CurrToken) {
             case TOKEN_TYPE_SETSTACKSIZE: {
                 // SetStackSize can only be found in the global scope, so make sure we
                 // aren't in a function.
@@ -103,7 +119,7 @@ void parse() {
                 while (GetNextToken() == TOKEN_TYPE_NEWLINE);
 
                 // Make sure the lexeme was an opening brace
-                if (g_Lexer.CurrToken != TOKEN_TYPE_OPEN_BRACE)
+                if (GetCurrTokenType() != TOKEN_TYPE_OPEN_BRACE)
                     ExitOnCharExpectedError('{');
 
                 // All functions are automatically appended with Ret, so increment the
@@ -136,7 +152,7 @@ void parse() {
                 int iSize = 1;
 
                 // Find out if an opening bracket lies ahead
-                if (GetLookAheadChar() == '[') {
+                if (GetLookAheadToken() == TOKEN_TYPE_OPEN_BRACKET) {
                     // Validate and consume the opening bracket
                     if (GetNextToken() != TOKEN_TYPE_OPEN_BRACKET)
                         ExitOnCharExpectedError('[');
@@ -181,23 +197,23 @@ void parse() {
             }
 
             case TOKEN_TYPE_PARAM: {
-                if ( ! iIsFuncActive )
-                    ExitOnCodeError ( ERROR_MSSG_GLOBAL_PARAM );
+                if (!iIsFuncActive)
+                    ExitOnCodeError(ERROR_MSSG_GLOBAL_PARAM);
 
-                if ( strcmp ( pstrCurrFuncName, MAIN_FUNC_NAME ) == 0 )
-                    ExitOnCodeError ( ERROR_MSSG_MAIN_PARAM );
+                if (strcmp(pstrCurrFuncName, MAIN_FUNC_NAME) == 0)
+                    ExitOnCodeError(ERROR_MSSG_MAIN_PARAM);
 
 
-                if(GetNextToken() != TOKEN_TYPE_IDENT)
-                    ExitOnCodeError ( ERROR_MSSG_IDENT_EXPECTED );
+                if (GetNextToken() != TOKEN_TYPE_IDENT)
+                    ExitOnCodeError(ERROR_MSSG_IDENT_EXPECTED);
 
-                iCurrFuncParamCount ++;
+                iCurrFuncParamCount++;
                 break;
             }
 
             case TOKEN_TYPE_IDENT: {
                 // Make sure it's a line label
-                if (GetLookAheadChar() != ':')
+                if (GetLookAheadToken() != TOKEN_TYPE_COLON)
                     ExitOnCodeError(ERROR_MSSG_INVALID_INSTR);
 
                 // Make sure we're in a function, since labels can only appear there
@@ -235,10 +251,10 @@ void parse() {
                 break;
             }
             default:
-                if (g_Lexer.CurrToken != TOKEN_TYPE_NEWLINE)
+                if (GetCurrTokenType() != TOKEN_TYPE_NEWLINE)
                     ExitOnCodeError(ERROR_MSSG_INVALID_INPUT);
         }
-        if (!SkipToNextLine())
+        if(!SkipToNextLine())
             break;
     }
 
@@ -257,12 +273,15 @@ void parse() {
 
     // ---- Perform the second pass over the source
     // Reset the lexer so we begin at the top of the source again
-    ResetLexer();
+    // InitLexer();
+    // point to the first token
+    g_pCurrTokenNode = g_TokenStream.pHead;
 
     while (TRUE) {
-        if (GetNextToken() == END_OF_TOKEN_STREAM)
+        Token CurrToken = GetNextToken();
+        if (CurrToken == END_OF_TOKEN_STREAM)
             break;
-        switch (g_Lexer.CurrToken) {
+        switch (GetCurrTokenType()) {
             case TOKEN_TYPE_FUNC: {
                 GetNextToken();
                 // Use the identifier (the current lexeme) to get it's corresponding function
@@ -364,11 +383,11 @@ void parse() {
 
                                 GetNextToken();
 
-                                if (g_Lexer.CurrToken == TOKEN_TYPE_QUOTE) {
+                                if (GetCurrTokenType() == TOKEN_TYPE_QUOTE) {
                                     // empty string
                                     pOpList[iCurrOpIndex].iType = OP_TYPE_INT;
                                     pOpList[iCurrOpIndex].iIntLiteral = 0;
-                                } else if (g_Lexer.CurrToken == TOKEN_TYPE_STRING) {
+                                } else if (GetCurrTokenType() == TOKEN_TYPE_STRING) {
                                     char *pstrString = GetCurrLexeme();
                                     // Add the string to the table, or get the index of
                                     // the existing copy
@@ -406,7 +425,7 @@ void parse() {
                                 if (!GetSymbolByIdent(pstrIdent, iCurrFuncIndex))
                                     ExitOnCodeError(ERROR_MSSG_UNDEFINED_IDENT);
                                 int iBaseIndex = GetStackIndexByIdent(pstrIdent, iCurrFuncIndex);
-                                if (GetLookAheadChar() != '[') {
+                                if (GetLookAheadToken() != TOKEN_TYPE_OPEN_BRACKET) {
 
                                     if (GetSizeByIdent(pstrIdent, iCurrFuncIndex) > 1)
                                         ExitOnCodeError(ERROR_MSSG_INVALID_ARRAY_NOT_INDEXED);
@@ -493,19 +512,19 @@ void parse() {
                         default:
                             ExitOnCodeError(ERROR_MSSG_INVALID_OP);
                     }
-                    if ( iCurrOpIndex < CurrInstr.iOpCount - 1 )
-                        if ( GetNextToken () != TOKEN_TYPE_COMMA )
-                            ExitOnCharExpectedError ( ',' );
+                    if (iCurrOpIndex < CurrInstr.iOpCount - 1)
+                        if (GetNextToken() != TOKEN_TYPE_COMMA)
+                            ExitOnCharExpectedError(',');
                 }
                 //if ( GetNextToken () != TOKEN_TYPE_NEWLINE )
                 //    ExitOnCodeError ( ERROR_MSSG_INVALID_INPUT );
 
-                g_pInstrStream [ g_iCurrInstrIndex ].pOpList = pOpList;
-                ++ g_iCurrInstrIndex;
+                g_pInstrStream[g_iCurrInstrIndex].pOpList = pOpList;
+                ++g_iCurrInstrIndex;
                 break;
             }
         }
-        if ( ! SkipToNextLine () )
+        if (!SkipToNextLine())
             break;
     }
 
