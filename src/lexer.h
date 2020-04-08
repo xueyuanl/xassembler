@@ -60,14 +60,22 @@
 #define END_OF_TOKEN_STREAM             19      // End of the token stream
 #define HEAD_OF_TOKEN_STREAM            20      // Placeholder of the first token stream
 
+typedef struct _Lexer               // The lexer's state
+{
+    unsigned int iIndex0;
+    unsigned int iIndex1;
+    int iCurrSourceLine;
+    int iCurrLexState;              // in string or not
+    Token CurrToken;
+    char pstrCurrLexeme[MAX_LEXEME_SIZE];
+
+} Lexer;
+
+extern Lexer lexer;
 
 void StripComments(char *pstrSourceLine);
 
 void TrimWhiteSpace(char *pstrString);
-
-char *GetCurrLexeme();
-
-Token GetCurrTokenType();
 
 Token GetNextToken();
 

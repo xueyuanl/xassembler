@@ -10,11 +10,9 @@
 #include "linked_list.h"
 #include "constants.h"
 #include "../structure/instruction.h"
-#include "../structure/token_stream.h"
 
 // Source code representation
 extern char **g_ppstrSourceCode;
-extern int g_iSourceCodeSize;
 extern int g_iInstrStreamSize;
 extern bool g_iIsSetStackSizeFound;
 extern int g_iSourceFileLine;
@@ -71,19 +69,6 @@ extern LinkedList g_LabelTable;
 extern LinkedList g_HostAPICallTable;
 
 typedef int Token;
-
-typedef struct _Lexer               // The lexer's state
-{
-    unsigned int iIndex0;
-    unsigned int iIndex1;
-    int iCurrSourceLine;
-    int iCurrLexState;              // in string or not
-    Token CurrToken;
-    char pstrCurrLexeme[MAX_LEXEME_SIZE];
-
-} Lexer;
-
-extern Lexer g_Lexer;
 
 // Token Stream
 extern LinkedList g_TokenStream;

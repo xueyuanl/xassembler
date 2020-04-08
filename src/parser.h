@@ -14,6 +14,7 @@
 #include "structure/symbol_table.h"
 #include "structure/label_table.h"
 #include "structure/string_table.h"
+#include "structure/token_stream.h"
 
 
 

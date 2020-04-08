@@ -7,6 +7,10 @@
 
 #include "../lib/constants.h"
 #include "../lib/globals.h"
+#include <stdlib.h>
+#include <string.h>
+#include "../lib/linked_list.h"
+
 typedef struct _TokenNode        // A Token Stream node
 {
     int iIndex;
@@ -15,5 +19,11 @@ typedef struct _TokenNode        // A Token Stream node
 } TokenNode;
 
 int AddToken(int type, char *pstrLexeme);
+
+char *GetCurrLexeme();
+
+Token GetCurrTokenType();
+
+Token GetCurrTokenIndex();
 
 #endif //ASSEMBLER_TOKEN_STREAM_H

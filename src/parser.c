@@ -4,20 +4,9 @@
 
 #include "parser.h"
 
-char *GetCurrLexeme() {
-    // Simply return the pointer rather than making a copy
-    TokenNode *pTokenNode = (TokenNode *) g_pCurrTokenNode->pData;
-    return pTokenNode->lexeme;
-}
-
-Token GetCurrTokenType() {
-    TokenNode *pTokenNode = (TokenNode *) g_pCurrTokenNode->pData;
-    return pTokenNode->iType;
-}
-
 int SkipToNextLine() {
     Token token = GetCurrTokenType();
-    while(token != TOKEN_TYPE_NEWLINE){
+    while (token != TOKEN_TYPE_NEWLINE) {
         token = GetNextToken();
         if (token == END_OF_TOKEN_STREAM)
             return FALSE;
@@ -254,7 +243,7 @@ void parse() {
                 if (GetCurrTokenType() != TOKEN_TYPE_NEWLINE)
                     ExitOnCodeError(ERROR_MSSG_INVALID_INPUT);
         }
-        if(!SkipToNextLine())
+        if (!SkipToNextLine())
             break;
     }
 
@@ -421,7 +410,7 @@ void parse() {
                         case TOKEN_TYPE_IDENT: {
                             if (CurrOpTypes & OP_FLAG_TYPE_MEM_REF) {
                                 char pstrIdent[MAX_IDENT_SIZE];
-                                strcpy (pstrIdent, GetCurrLexeme());
+                                strcpy(pstrIdent, GetCurrLexeme());
                                 if (!GetSymbolByIdent(pstrIdent, iCurrFuncIndex))
                                     ExitOnCodeError(ERROR_MSSG_UNDEFINED_IDENT);
                                 int iBaseIndex = GetStackIndexByIdent(pstrIdent, iCurrFuncIndex);

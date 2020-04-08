@@ -1,10 +1,7 @@
 //
 // Created by pat on 4/6/20.
 //
-#include <stdlib.h>
-#include <string.h>
 #include "token_stream.h"
-#include "../lib/linked_list.h"
 
 int AddToken(int type, char *pstrLexeme) {
     // Create a new token node
@@ -22,4 +19,20 @@ int AddToken(int type, char *pstrLexeme) {
 
     // Return the new token's index
     return iIndex;
+}
+
+char *GetCurrLexeme() {
+    // Simply return the pointer rather than making a copy
+    TokenNode *pTokenNode = (TokenNode *) g_pCurrTokenNode->pData;
+    return pTokenNode->lexeme;
+}
+
+Token GetCurrTokenType() {
+    TokenNode *pTokenNode = (TokenNode *) g_pCurrTokenNode->pData;
+    return pTokenNode->iType;
+}
+
+Token GetCurrTokenIndex() {
+    TokenNode *pTokenNode = (TokenNode *) g_pCurrTokenNode->pData;
+    return pTokenNode->iIndex;
 }
