@@ -25,6 +25,6 @@ int AddString(LinkedList *pList, char *pstrString) {
     strcpy(pstrStringNode, pstrString);
 
     // Add the string to the list and return its index
-    //return AddNode(pList, pstrStringNode);
-    return 1;
+    return AddNode(pList, pstrStringNode);
+    //return 1;
 }
