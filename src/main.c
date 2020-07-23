@@ -399,7 +399,7 @@ int main(int argc, char *argv[]) {
 ////    }*/
 
     Init();
-    g_iSourceFileLine = LoadSourceFile("/Users/hsuehyuan/mnt/pi/assembler/src/script");
+    g_iSourceFileLine = LoadSourceFile("/home/mystic/workspace/xassembler/src/script");
     parse();
     //PrintTableInfo();
     BuildXSE();
