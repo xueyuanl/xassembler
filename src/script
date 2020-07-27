@@ -13,11 +13,11 @@ Func MyAdd
     Param   X
     ; Declare local data
     Var    Sum
-    Mov Sum, X
-    Add Sum, Y
+    Mov Sum, X                          ; Entry Point 0, Entry Point can be understood as instruction number.
+    Add Sum, Y                          ; Entry Point 1
     ; Put the result in the _RetVal register Mov _RetVal, Sum
     ; Remember, Ret will be automatically added
-}
+}                                       ; Entry Point Ret 2
 ; Just a bizarre function that does nothing in particular
 Func MyFunc
 {
@@ -25,25 +25,25 @@ Func MyFunc
     ; But it does have local data
     Var MySum
     ; We're going to test the Add function, so we'll ; start by pushing two integer parameters.
-    Push 16
-    Push 32
+    Push 16                             ; Entry Point 3
+    Push 32                             ; Entry Point 4
     ; Next we make the function call itself
-    Call MyAdd
+    Call MyAdd                          ; Entry Point 5
     ; And finally, we grab the return value from _RetVal Mov MySum, _RetVal
     ; Multiply MySum by 2 and store it in GlobalVar
-    Mul MySum, 2
-    Mov GlobalVar, MySum
+    Mul MySum, 2                        ; Entry Point 6
+    Mov GlobalVar, MySum                ; Entry Point 7
     ; Set some array values
-    Mov GlobalArray [ 0 ], "This"
-    Mov GlobalArray [ 1 ], "is"
-    Mov GlobalArray [ 2 ], "an"
-    Mov GlobalArray [ 3 ], "array."
-}
+    Mov GlobalArray [ 0 ], "This"       ; Entry Point 8
+    Mov GlobalArray [ 1 ], "is"         ; Entry Point 9
+    Mov GlobalArray [ 2 ], "an"         ; Entry Point 10
+    Mov GlobalArray [ 3 ], "array."     ; Entry Point 11
+}                                       ; Entry Point Ret 12
 
 ; The special _Main () function, which will be automatically executed
 Func _Main
 {
     ; Call the MyFunc test function
-    Call MyFunc
-}
+    Call MyFunc                         ; Entry Point 13
+}                                       ; Entry Point 14
 ; should a line at the end, or a bug appear during TrimWhiteSpace()
